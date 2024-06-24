@@ -54,6 +54,11 @@ KEYPOINT_EDGE_INDS_TO_COLOR = {
     (14, 16): 'c'
 }
 
+def preprocess_image(image, input_size):
+    image = tf.image.resize_with_pad(image, input_size, input_size)
+    image = tf.cast(image, dtype=tf.int32)
+    return image
+
 def _keypoints_and_edges_for_display(keypoints_with_scores, height, width, keypoint_threshold=0.11):
     keypoints_all = []
     keypoint_edges_all = []
@@ -90,7 +95,6 @@ def _keypoints_and_edges_for_display(keypoints_with_scores, height, width, keypo
     else:
         edges_xy = np.zeros((0, 2, 2))
     return keypoints_xy, edges_xy, edge_colors
-
 
 def draw_prediction_on_image(image, keypoints_with_scores, crop_region=None, close_figure=False, output_image_height=None):
     height, width, channel = image.shape
@@ -132,31 +136,28 @@ def draw_prediction_on_image(image, keypoints_with_scores, crop_region=None, clo
         ax.add_patch(rect)
 
     fig.canvas.draw()
-    
-    # image_from_plot = np.frombuffer(fig.canvas.tostring_rgb(), dtype=np.uint8)
-    fig_width, fig_height = fig.canvas.get_width_height()
-
     rgba_buffer = fig.canvas.buffer_rgba()
-    image_from_plot = np.asarray(rgba_buffer)[:,:,:3]  # Slice off the alpha channel
+    image_from_plot = np.asarray(rgba_buffer, dtype=np.uint8)
 
-    expected_total_size = fig_width * fig_height * 3
+    fig_width, fig_height = fig.canvas.get_width_height()
+    expected_total_size = fig_width * fig_height * 4  # rgba has 4 channels
 
-    if image_from_plot.size!= expected_total_size:
+    if image_from_plot.size != expected_total_size:
         print(f"Mismatch in sizes: Expected {expected_total_size}, got {image_from_plot.size}")
     else:
-    # Reshape the array to match the figure dimensions
-        image_from_plot = image_from_plot.reshape(fig_height, fig_width, 3)
-    # image_from_plot = image_from_plot.reshape(fig_height, fig_width, 3)
-    # image_from_plot = image_from_plot.reshape(
-    #     fig.canvas.get_width_height()[::-1] + (3,))
-    # plt.close(fig)
+        image_from_plot = image_from_plot.reshape(fig_height, fig_width, 4)  # reshape to include the alpha channel
+        image_from_plot = image_from_plot[..., :3]  # remove the alpha channel
 
     if output_image_height is not None:
         output_image_width = int(output_image_height / height * width)
         image_from_plot = cv2.resize(
             image_from_plot, dsize=(output_image_width, output_image_height),
             interpolation=cv2.INTER_CUBIC)
+    
+    plt.close(fig)
     return image_from_plot
+
+
 
 def to_gif(images, fps):
     """Converts image sequence (4D numpy array) to gif."""
@@ -174,8 +175,7 @@ def progress(value, max=100):
       </progress>
   """.format(value=value, max=max))
 
-
-model_name = "movenet_lightning"
+model_name = "movenet_thunder"
 
 if "tflite" in model_name:
     if "movenet_lightning_f16" in model_name:
@@ -214,7 +214,7 @@ if "tflite" in model_name:
 
 else:
     if "movenet_lightning" in model_name:
-        module = hub.load("https://tfhub.dev/google/movenet/singlepose/lightning/4")
+        module = hub.load("https://tfhub.dev/google/movenet/singlepose/lightning/3")
         input_size = 192
     elif "movenet_thunder" in model_name:
         module = hub.load("https://tfhub.dev/google/movenet/singlepose/thunder/4")
@@ -238,20 +238,21 @@ else:
         return keypoints_with_scores
 
 
-
-
-# photo!!!!!
-
+def smooth_keypoints(keypoints_with_scores, alpha=0.7):
+    smoothed_keypoints = keypoints_with_scores.copy()
+    for i in range(1, keypoints_with_scores.shape[1]):
+        smoothed_keypoints[0, i, :, :2] = alpha * keypoints_with_scores[0, i, :, :2] + (1 - alpha) * keypoints_with_scores[0, i-1, :, :2]
+    return smoothed_keypoints
 
 # Example usage:
 # Assuming you have an image loaded as `input_image`
-input_image = tf.image.decode_image(tf.io.read_file('./img3.png'))
+input_image = tf.image.decode_image(tf.io.read_file('../media/5.png'))
 # Remove the alpha channel if present
 if input_image.shape[-1] == 4:
     input_image = input_image[..., :3]
+preprocessed_image = preprocess_image(input_image, input_size)
 keypoints_with_scores = movenet(input_image)
+keypoints_with_scores = smooth_keypoints(keypoints_with_scores)
 image_with_keypoints = draw_prediction_on_image(input_image.numpy(), keypoints_with_scores)
 plt.imshow(image_with_keypoints)
 plt.show()
-
-

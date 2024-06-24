@@ -15,12 +15,12 @@ KEYPOINT_DICT = {
     'right_eye': 2,
     'left_ear': 3,
     'right_ear': 4,
-    'left_shoulder': 5,
-    'right_shoulder': 6,
-    'left_elbow': 7,
-    'right_elbow': 8,
-    'left_wrist': 9,
-    'right_wrist': 10,
+    # 'left_shoulder': 5,
+    # 'right_shoulder': 6,
+    # 'left_elbow': 7,
+    # 'right_elbow': 8,
+    # 'left_wrist': 9,
+    # 'right_wrist': 10,
     'left_hip': 11,
     'right_hip': 12,
     'left_knee': 13,
@@ -34,15 +34,15 @@ KEYPOINT_EDGE_INDS_TO_COLOR = {
     (0, 2): 'c',
     (1, 3): 'm',
     (2, 4): 'c',
-    (0, 5): 'm',
-    (0, 6): 'c',
-    (5, 7): 'm',
-    (7, 9): 'm',
-    (6, 8): 'c',
-    (8, 10): 'c',
-    (5, 6): 'y',
-    (5, 11): 'm',
-    (6, 12): 'c',
+    # (0, 5): 'm',
+    # (0, 6): 'c',
+    # (5, 7): 'm',
+    # (7, 9): 'm',
+    # (6, 8): 'c',
+    # (8, 10): 'c',
+    # (5, 6): 'y',
+    # (5, 11): 'm',
+    # (6, 12): 'c',
     (11, 12): 'y',
     (11, 13): 'm',
     (13, 15): 'm',
@@ -149,19 +149,19 @@ def movenet(input_image):
     return keypoints_with_scores
 
 # Load the MoveNet model
-model_name = "movenet_lightning"
+model_name = "movenet_thunder"
 if "movenet_lightning" in model_name:
-    module = hub.load("https://tfhub.dev/google/movenet/singlepose/lightning/4")
+    module = hub.load("https://tfhub.dev/google/movenet/singlepose/lightning/3")
     input_size = 192
 elif "movenet_thunder" in model_name:
-    module = hub.load("https://tfhub.dev/google/movenet/singlepose/thunder/4")
+    module = hub.load("https://tfhub.dev/google/movenet/singlepose/thunder/3")
     input_size = 256
 else:
     raise ValueError("Unsupported model name: %s" % model_name)
 
 # Process video
-video_path = './quad_4.mp4'
-output_video_path = './output_video_with_keypoints.mp4'
+video_path = './raise_10.mp4'
+output_video_path = './raise_10_yess.mp4'
 cap = cv2.VideoCapture(video_path)
 fourcc = cv2.VideoWriter_fourcc(*'mp4v')
 out = None

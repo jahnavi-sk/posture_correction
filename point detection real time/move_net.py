@@ -5,7 +5,7 @@ import cv2
 
 
 # Load Model
-interpreter = tf.lite.Interpreter(model_path='3.tflite')
+interpreter = tf.lite.Interpreter(model_path='../models/3.tflite')
 interpreter.allocate_tensors()
 
 
