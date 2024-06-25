@@ -160,8 +160,8 @@ else:
     raise ValueError("Unsupported model name: %s" % model_name)
 
 # Process video
-video_path = './raise_10.mp4'
-output_video_path = './raise_10_yess.mp4'
+video_path = '../media/raise_10.mp4'
+output_video_path = '../media/raise_10_yesok.mp4'
 cap = cv2.VideoCapture(video_path)
 fourcc = cv2.VideoWriter_fourcc(*'mp4v')
 out = None
