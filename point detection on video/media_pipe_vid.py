@@ -7,9 +7,9 @@ mpPose = mp.solutions.pose
 pose = mpPose.Pose()
 
 # Specify the path to your input video file
-video_input_path = '../media/raise_10.mp4'
+video_input_path = '../media/long_2.mp4'
 # Specify the path for the output video file
-video_output_path = '../media/media_raise_10.mp4'
+video_output_path = '../media/media_long_10.mp4'
 
 # Create a VideoCapture object for reading the input video
 cap = cv2.VideoCapture(video_input_path)
