@@ -15,18 +15,18 @@ args = parser.parse_args()
 BODY_PARTS = { "Nose": 0, "Neck": 1, "RShoulder": 2, "RElbow": 3, "RWrist": 4,
                "LShoulder": 5, "LElbow": 6, "LWrist": 7, "RHip": 8, "RKnee": 9,
                "RAnkle": 10, "LHip": 11, "LKnee": 12, "LAnkle": 13, "REye": 14,
-               "LEye": 15, "REar": 16, "LEar": 17, "Background": 18 }
+               "LEye": 15, "REar": 16, "LEar": 17, "Background": 18 , "LPalm":19, "RPalm":20}
 
 POSE_PAIRS = [ ["Neck", "RShoulder"], ["Neck", "LShoulder"], ["RShoulder", "RElbow"],
                ["RElbow", "RWrist"], ["LShoulder", "LElbow"], ["LElbow", "LWrist"],
                ["RShoulder", "RHip"], ["RHip", "RKnee"], ["RKnee", "RAnkle"], ["LShoulder", "LHip"],
                ["LHip", "LKnee"], ["LKnee", "LAnkle"], ["Neck", "Nose"], ["Nose", "REye"],
-                ["Nose", "LEye"], ["LHip","RHip"] ]
+                ["Nose", "LEye"], ["LHip","RHip"], ["LWrist","LPalm"], ["RWrist","RPalm"]]
 
 inWidth = args.width
 inHeight = args.height
 
-net = cv.dnn.readNetFromTensorflow("graph_opt.pb")
+net = cv.dnn.readNetFromTensorflow("../models/graph_opt.pb")
 
 cap = cv.VideoCapture(args.input if args.input else 0)
 
@@ -41,7 +41,7 @@ while cv.waitKey(1) < 0:
     
     net.setInput(cv.dnn.blobFromImage(frame, 1.0, (inWidth, inHeight), (127.5, 127.5, 127.5), swapRB=True, crop=False))
     out = net.forward()
-    out = out[:, :19, :, :]  # MobileNet output [1, 57, -1, -1], we only need the first 19 elements
+    out = out[:, :21, :, :]  # MobileNet output [1, 57, -1, -1], we only need the first 19 elements
 
     assert(len(BODY_PARTS) == out.shape[1])
 
