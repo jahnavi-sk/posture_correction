@@ -4,12 +4,21 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
 
 # Load the data
-df = pd.read_excel('angles_output.xlsx')
+df = pd.read_excel('../media/angles_output_knee.xlsx')
 
 # Features (angles) and labels (poses)
 X = df[['Right Knee Angle', 'Left Knee Angle', 'Right Elbow Angle', 'Left Elbow Angle',
         'Right Hip Angle', 'Left Hip Angle', 'Right Shoulder Angle', 'Left Shoulder Angle',
         'Right Torso Angle', 'Left Torso Angle', 'Right Side Angle', 'Left Side Angle']]
+
+# X = df[['Right Wrist Index Angle', 'Left Wrist Index Angle', 'Right Wrist Thumb Angle', 
+#         'Left Wrist Thumb Angle', 'Right Wrist Pinky Angle', 'Left Wrist Pinky Angle', 
+#         'Right Outer Wrist Angle', 'Left Outer Wrist Angle', 'Right Inner Wrist 1 Angle', 
+#         'Left Inner Wrist 1 Angle', 'Right Inner Wrist 2 Angle', 'Left Inner Wrist 2 Angle', 
+#         'Right Torso Upper Angle', 'Left Torso Upper Angle', 'Right Torso Angle', 
+#         'Left Torso Angle', 'Right Elbow Angle', 'Left Elbow Angle']]
+
+
 y = df['Subfolder']
 
 # Handle missing values by replacing them with the column mean
@@ -28,4 +37,4 @@ print(f'Accuracy: {accuracy_score(y_test, y_pred)}')
 
 # Save the trained model using joblib
 import joblib
-joblib.dump(model, 'pose_classification_model.pkl')
+joblib.dump(model, 'pose_classification_knee_model.pkl')
