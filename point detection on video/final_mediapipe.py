@@ -4,6 +4,13 @@ import math
 import pandas as pd
 import os
 
+def calculate_torso_angle(landmark1, landmark2):
+    try:
+        angle = math.degrees(math.atan2(abs(landmark1[1] - landmark2[1]), abs(landmark1[0] - landmark2[0])))
+        return angle
+    except:
+        return None
+    
 def calculate_angle(point1, point2, point3):
     try:
         # Calculate the angle between point1, point2, and point3
@@ -28,7 +35,7 @@ mpPose = mp.solutions.pose
 pose = mpPose.Pose()
 
 # Specify the path to your input folder containing subfolders with videos
-input_folder_path = '../media/shoulder_vid'
+input_folder_path = '../media/hip_vid'
 
 # List to store the angles
 angles_list = []
@@ -117,14 +124,19 @@ for subfolder_name in os.listdir(input_folder_path):
 
                     right_torso_upper_angle = calculate_angle(landmarks[RIGHT_HIP], landmarks[RIGHT_SHOULDER], landmarks[LEFT_SHOULDER])
                     left_torso_upper_angle = calculate_angle(landmarks[LEFT_HIP], landmarks[LEFT_SHOULDER], landmarks[RIGHT_SHOULDER])
-              
+                    right_groin_angle = calculate_angle(landmarks[LEFT_KNEE], landmarks[LEFT_HIP],landmarks[RIGHT_KNEE])
+                    left_groin_angle = calculate_angle(landmarks[RIGHT_KNEE],landmarks[RIGHT_HIP],landmarks[LEFT_KNEE])
+                    right_torsorel_angle = calculate_torso_angle(landmarks[RIGHT_SHOULDER], landmarks[RIGHT_HIP])
+                    left_torsorel_angle = calculate_torso_angle(landmarks[LEFT_SHOULDER], landmarks[LEFT_HIP])
+
+                    
                     # Append angles to the list
 
                     
-                    # angles_list.append([subfolder_name, video_number, right_knee_angle, left_knee_angle, right_elbow_angle, left_elbow_angle, right_hip_angle, left_hip_angle, right_shoulder_angle, left_shoulder_angle, right_torso_angle, left_torso_angle, right_side, left_side])
+                    angles_list.append([subfolder_name, video_number, right_knee_angle, left_knee_angle, right_groin_angle, left_groin_angle, right_hip_angle, left_hip_angle, right_shoulder_angle, left_shoulder_angle, right_torso_angle, left_torso_angle, right_side, left_side,right_torsorel_angle,left_torsorel_angle])
 
 
-                    angles_list.append([subfolder_name, video_number, right_elbow_angle, left_elbow_angle, right_hip_angle, left_hip_angle, right_shoulder_angle, left_shoulder_angle, right_torso_angle, left_torso_angle, right_side, left_side])
+                    # angles_list.append([subfolder_name, video_number, right_elbow_angle, left_elbow_angle, right_hip_angle, left_hip_angle, right_shoulder_angle, left_shoulder_angle, right_torso_angle, left_torso_angle, right_side, left_side])
 
 
                     # angles_list.append([subfolder_name,video_number,right_wrist_index_angle,left_wrist_index_angle,right_wrist_thumb_angle,left_wrist_thumb_angle,right_wrist_pinky_angle, left_wrist_pinky_angle,right_outer_wrist_angle,left_outer_wrist_angle,right_inner_wrist_1_angle,left_inner_wrist_1_angle,right_inner_wrist_2_angle,left_inner_wrist_2_angle, right_torso_upper_angle,left_torso_upper_angle, right_torso_angle, left_torso_angle, right_elbow_angle,left_elbow_angle])
@@ -135,10 +147,10 @@ for subfolder_name in os.listdir(input_folder_path):
 cv2.destroyAllWindows()
 pose.close()
 # Create a DataFrame from the angles list
-# df = pd.DataFrame(angles_list, columns=['Subfolder', 'Video Number', 'Right Knee Angle', 'Left Knee Angle', 'Right Elbow Angle', 'Left Elbow Angle', 'Right Hip Angle', 'Left Hip Angle', 'Right Shoulder Angle', 'Left Shoulder Angle','Right Torso Angle', 'Left Torso Angle', 'Right Side Angle', 'Left Side angle' ])
+df = pd.DataFrame(angles_list, columns=['Subfolder', 'Video Number', 'Right Knee Angle', 'Left Knee Angle', 'Right Elbow Angle', 'Left Elbow Angle', 'Right Hip Angle', 'Left Hip Angle', 'Right Shoulder Angle', 'Left Shoulder Angle','Right Torso Angle', 'Left Torso Angle', 'Right Side Angle', 'Left Side Angle','Right Torso Rel Angle','Left Torso Rel Angle' ])
 
 
-df = pd.DataFrame(angles_list, columns=['Subfolder', 'Video Number', 'Right Elbow Angle', 'Left Elbow Angle', 'Right Hip Angle', 'Left Hip Angle', 'Right Shoulder Angle', 'Left Shoulder Angle','Right Torso Angle', 'Left Torso Angle', 'Right Side Angle', 'Left Side angle' ])
+# df = pd.DataFrame(angles_list, columns=['Subfolder', 'Video Number', 'Right Elbow Angle', 'Left Elbow Angle', 'Right Hip Angle', 'Left Hip Angle', 'Right Shoulder Angle', 'Left Shoulder Angle','Right Torso Angle', 'Left Torso Angle', 'Right Side Angle', 'Left Side angle' ])
 
 
 # df = pd.DataFrame(angles_list, columns=[
@@ -150,7 +162,7 @@ df = pd.DataFrame(angles_list, columns=['Subfolder', 'Video Number', 'Right Elbo
 # ])
 
 # Write the DataFrame to an Excel file
-excel_output_path = '../media/angles_output_shoulder.xlsx'
+excel_output_path = '../media/angles_output_hip3.xlsx'
 df.to_excel(excel_output_path, index=False)
 
 print(f"Angles have been saved to {excel_output_path}")

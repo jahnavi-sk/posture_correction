@@ -23,7 +23,7 @@ mpPose = mp.solutions.pose
 pose = mpPose.Pose()
 
 # Load the trained model
-model = joblib.load('pose_classification_shoulder_model.pkl')
+model = joblib.load('pose_classification_knee2_model.pkl')
 
 # Path to the new video
 video_path = 'vidvid.mp4'

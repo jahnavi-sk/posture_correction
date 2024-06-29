@@ -5,6 +5,14 @@ import joblib
 import pandas as pd
 from collections import Counter
 
+
+def calculate_torso_angle(landmark1, landmark2):
+    try:
+        angle = math.degrees(math.atan2(abs(landmark1[1] - landmark2[1]), abs(landmark1[0] - landmark2[0])))
+        return angle
+    except:
+        return None
+    
 def calculate_angle(point1, point2, point3):
     try:
         vector1 = [point1[0] - point2[0], point1[1] - point2[1]]
@@ -23,7 +31,7 @@ mpPose = mp.solutions.pose
 pose = mpPose.Pose()
 
 # Load the trained model
-model = joblib.load('pose_classification_shoulder2_model.pkl')
+model = joblib.load('pose_classification_hip4_model.pkl')
 
 # Open webcam
 cap = cv2.VideoCapture(0)
@@ -68,26 +76,30 @@ while cap.isOpened():
         left_torso_angle = calculate_angle(landmarks[LEFT_SHOULDER], landmarks[LEFT_HIP], landmarks[RIGHT_HIP])
         right_side = calculate_angle(landmarks[RIGHT_SHOULDER], landmarks[RIGHT_HIP], landmarks[RIGHT_KNEE])
         left_side = calculate_angle(landmarks[LEFT_SHOULDER], landmarks[LEFT_HIP], landmarks[LEFT_KNEE])
+        right_groin_angle = calculate_angle(landmarks[LEFT_KNEE], landmarks[LEFT_HIP],landmarks[RIGHT_KNEE])
+        left_groin_angle = calculate_angle(landmarks[RIGHT_KNEE],landmarks[RIGHT_HIP],landmarks[LEFT_KNEE])
+        right_torsorel_angle = calculate_torso_angle(landmarks[RIGHT_SHOULDER], landmarks[RIGHT_HIP])
+        left_torsorel_angle = calculate_torso_angle(landmarks[LEFT_SHOULDER], landmarks[LEFT_HIP])
 
-        # angles = [right_knee_angle, left_knee_angle, right_elbow_angle, left_elbow_angle, right_hip_angle, left_hip_angle, right_shoulder_angle, left_shoulder_angle, right_torso_angle, left_torso_angle, right_side, left_side]
+        angles = [right_knee_angle, left_knee_angle, right_groin_angle, left_groin_angle, right_hip_angle, left_hip_angle, right_shoulder_angle, left_shoulder_angle, right_torso_angle, left_torso_angle, right_side, left_side,right_torsorel_angle,left_torsorel_angle]
 
-        angles = [right_elbow_angle, left_elbow_angle, right_hip_angle, left_hip_angle, right_shoulder_angle, left_shoulder_angle, right_torso_angle, left_torso_angle, right_side, left_side]
+        # angles = [right_elbow_angle, left_elbow_angle, right_hip_angle, left_hip_angle, right_shoulder_angle, left_shoulder_angle, right_torso_angle, left_torso_angle, right_side, left_side]
 
 
-        # angles_df = pd.DataFrame([angles], columns=['Right Knee Angle', 'Left Knee Angle', 'Right Elbow Angle', 'Left Elbow Angle', 
+        angles_df = pd.DataFrame([angles], columns=['Right Knee Angle', 'Left Knee Angle', 'Right Groin Angle', 'Left Groin Angle', 
+                                                    'Right Hip Angle', 'Left Hip Angle', 'Right Shoulder Angle', 'Left Shoulder Angle', 
+                                                    'Right Torso Angle', 'Left Torso Angle', 'Right Side Angle', 'Left Side Angle', 'Right Torso Rel Angle','Left Torso Rel Angle'])
+        
+        # angles_df = pd.DataFrame([angles], columns=['Right Elbow Angle', 'Left Elbow Angle', 
         #                                             'Right Hip Angle', 'Left Hip Angle', 'Right Shoulder Angle', 'Left Shoulder Angle', 
         #                                             'Right Torso Angle', 'Left Torso Angle', 'Right Side Angle', 'Left Side Angle'])
-        
-        angles_df = pd.DataFrame([angles], columns=['Right Elbow Angle', 'Left Elbow Angle', 
-                                                    'Right Hip Angle', 'Left Hip Angle', 'Right Shoulder Angle', 'Left Shoulder Angle', 
-                                                    'Right Torso Angle', 'Left Torso Angle', 'Right Side Angle', 'Left Side Angle'])
         
         angles_df.fillna(angles_df.mean(), inplace=True)
 
         predictions = model.predict(angles_df)
         pose_prediction = Counter(predictions).most_common(1)[0][0]
 
-        cv2.putText(frame, pose_prediction, (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        cv2.putText(frame, pose_prediction, (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 2)
     else:
         cv2.putText(frame, "NO POSE", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
 
