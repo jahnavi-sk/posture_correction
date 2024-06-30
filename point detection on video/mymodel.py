@@ -4,12 +4,12 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
 
 # Load the data
-df = pd.read_excel('../media/angles_output_hip3.xlsx')
+df = pd.read_excel('../media/angles_output_hip6.xlsx')
 
 # Features (angles) and labels (poses)
 X = df[['Right Knee Angle', 'Left Knee Angle', 'Right Groin Angle', 'Left Groin Angle',
         'Right Hip Angle', 'Left Hip Angle', 'Right Shoulder Angle', 'Left Shoulder Angle',
-        'Right Torso Angle', 'Left Torso Angle', 'Right Side Angle', 'Left Side Angle','Right Torso Rel Angle','Left Torso Rel Angle']]
+        'Right Torso Angle', 'Left Torso Angle', 'Right Side Angle', 'Left Side Angle','Right Torso Rel Angle','Left Torso Rel Angle','Right Knee Ankle Angle','Left Knee Ankle Angle']]
 
 # X = df[['Right Wrist Index Angle', 'Left Wrist Index Angle', 'Right Wrist Thumb Angle', 
 #         'Left Wrist Thumb Angle', 'Right Wrist Pinky Angle', 'Left Wrist Pinky Angle', 
@@ -37,4 +37,4 @@ print(f'Accuracy: {accuracy_score(y_test, y_pred)}')
 
 # Save the trained model using joblib
 import joblib
-joblib.dump(model, 'pose_classification_hip4_model.pkl')
+joblib.dump(model, 'pose_classification_hip6_model.pkl')

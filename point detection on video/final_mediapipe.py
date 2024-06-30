@@ -4,6 +4,32 @@ import math
 import pandas as pd
 import os
 
+
+
+def calculate_knee_ankle_vertical_angle(knee, ankle):
+    """
+    Calculate the angle between the line formed by knee and ankle landmarks and the vertical axis.
+    
+    Parameters:
+    knee (tuple): Coordinates of the knee (x_k, y_k).
+    ankle (tuple): Coordinates of the ankle (x_a, y_a).
+    
+    Returns:
+    float: Angle in degrees.
+    """
+    try:
+        # Calculate the differences in x and y coordinates
+        dx = knee[0] - ankle[0]
+        dy = knee[1] - ankle[1]
+        
+        # Calculate the angle with respect to the vertical axis
+        angle_radians = math.atan2(abs(dx), abs(dy))
+        angle_degrees = math.degrees(angle_radians)
+        
+        return angle_degrees
+    except:
+        return None
+    
 def calculate_torso_angle(landmark1, landmark2):
     try:
         angle = math.degrees(math.atan2(abs(landmark1[1] - landmark2[1]), abs(landmark1[0] - landmark2[0])))
@@ -129,11 +155,14 @@ for subfolder_name in os.listdir(input_folder_path):
                     right_torsorel_angle = calculate_torso_angle(landmarks[RIGHT_SHOULDER], landmarks[RIGHT_HIP])
                     left_torsorel_angle = calculate_torso_angle(landmarks[LEFT_SHOULDER], landmarks[LEFT_HIP])
 
+                    right_knee_ankle_angle = calculate_knee_ankle_vertical_angle(landmarks[RIGHT_KNEE], landmarks[RIGHT_ANKLE])
+                    left_knee_ankle_angle = calculate_knee_ankle_vertical_angle(landmarks[LEFT_KNEE], landmarks[LEFT_ANKLE])
+
                     
                     # Append angles to the list
 
                     
-                    angles_list.append([subfolder_name, video_number, right_knee_angle, left_knee_angle, right_groin_angle, left_groin_angle, right_hip_angle, left_hip_angle, right_shoulder_angle, left_shoulder_angle, right_torso_angle, left_torso_angle, right_side, left_side,right_torsorel_angle,left_torsorel_angle])
+                    angles_list.append([subfolder_name, video_number, right_knee_angle, left_knee_angle, right_groin_angle, left_groin_angle, right_hip_angle, left_hip_angle, right_shoulder_angle, left_shoulder_angle, right_torso_angle, left_torso_angle, right_side, left_side,right_torsorel_angle,left_torsorel_angle, right_knee_ankle_angle, left_knee_ankle_angle])
 
 
                     # angles_list.append([subfolder_name, video_number, right_elbow_angle, left_elbow_angle, right_hip_angle, left_hip_angle, right_shoulder_angle, left_shoulder_angle, right_torso_angle, left_torso_angle, right_side, left_side])
@@ -147,7 +176,7 @@ for subfolder_name in os.listdir(input_folder_path):
 cv2.destroyAllWindows()
 pose.close()
 # Create a DataFrame from the angles list
-df = pd.DataFrame(angles_list, columns=['Subfolder', 'Video Number', 'Right Knee Angle', 'Left Knee Angle', 'Right Elbow Angle', 'Left Elbow Angle', 'Right Hip Angle', 'Left Hip Angle', 'Right Shoulder Angle', 'Left Shoulder Angle','Right Torso Angle', 'Left Torso Angle', 'Right Side Angle', 'Left Side Angle','Right Torso Rel Angle','Left Torso Rel Angle' ])
+df = pd.DataFrame(angles_list, columns=['Subfolder', 'Video Number', 'Right Knee Angle', 'Left Knee Angle', 'Right Groin Angle', 'Left Groin Angle', 'Right Hip Angle', 'Left Hip Angle', 'Right Shoulder Angle', 'Left Shoulder Angle','Right Torso Angle', 'Left Torso Angle', 'Right Side Angle', 'Left Side Angle','Right Torso Rel Angle','Left Torso Rel Angle','Right Knee Ankle Angle','Left Knee Ankle Angle' ])
 
 
 # df = pd.DataFrame(angles_list, columns=['Subfolder', 'Video Number', 'Right Elbow Angle', 'Left Elbow Angle', 'Right Hip Angle', 'Left Hip Angle', 'Right Shoulder Angle', 'Left Shoulder Angle','Right Torso Angle', 'Left Torso Angle', 'Right Side Angle', 'Left Side angle' ])
@@ -162,7 +191,7 @@ df = pd.DataFrame(angles_list, columns=['Subfolder', 'Video Number', 'Right Knee
 # ])
 
 # Write the DataFrame to an Excel file
-excel_output_path = '../media/angles_output_hip3.xlsx'
+excel_output_path = '../media/angles_output_hip6.xlsx'
 df.to_excel(excel_output_path, index=False)
 
 print(f"Angles have been saved to {excel_output_path}")

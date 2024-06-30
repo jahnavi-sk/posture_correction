@@ -7,9 +7,9 @@ mpPose = mp.solutions.pose
 pose = mpPose.Pose()
 
 # Specify the path to your input video file
-video_input_path = '../media/wrist_vid/ex_5/ex_5.mp4'
+video_input_path = '../media/hip_vid/thigh leg lift/lift_3.mp4'
 # Specify the path for the output video file
-video_output_path = '../media/ex_5_media.mp4'
+video_output_path = 'liftvideo.mp4'
 
 # Create a VideoCapture object for reading the input video
 cap = cv2.VideoCapture(video_input_path)
