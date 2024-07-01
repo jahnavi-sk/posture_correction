@@ -128,6 +128,23 @@ while cap.isOpened():
         predictions = model.predict(angles_df)
         pose_prediction = Counter(predictions).most_common(1)[0][0]
 
+
+
+        connections = [[RIGHT_HIP, RIGHT_KNEE], [RIGHT_KNEE, RIGHT_ANKLE], [LEFT_HIP, LEFT_KNEE], [LEFT_KNEE, LEFT_ANKLE],
+                       [RIGHT_SHOULDER, RIGHT_ELBOW], [RIGHT_ELBOW, RIGHT_WRIST], [LEFT_SHOULDER, LEFT_ELBOW], [LEFT_ELBOW, LEFT_WRIST],
+                       [RIGHT_SHOULDER, RIGHT_HIP], [LEFT_SHOULDER, LEFT_HIP], [RIGHT_HIP, LEFT_HIP],
+                       [RIGHT_SHOULDER, RIGHT_KNEE], [LEFT_SHOULDER, LEFT_KNEE], [RIGHT_KNEE, LEFT_KNEE]]
+
+        for connection in connections:
+            cv2.line(frame, landmarks[connection[0]], landmarks[connection[1]], (0, 255, 0), 3)
+
+        # Draw landmarks on the frame
+        for lm in results.pose_landmarks.landmark:
+            h, w, c = frame.shape
+            cx, cy = int(lm.x * w), int(lm.y * h)
+            cv2.circle(frame, (cx, cy), 8, (255, 0, 0), cv2.FILLED)
+
+
         cv2.putText(frame, pose_prediction, (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 2)
     else:
         cv2.putText(frame, "NO POSE", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
