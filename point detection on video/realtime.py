@@ -54,7 +54,7 @@ mpPose = mp.solutions.pose
 pose = mpPose.Pose()
 
 # Load the trained model
-model = joblib.load('../models/hip/pose_classification_hip5_model.pkl')
+model = joblib.load('../models/back/pose_classification_model.pkl')
 
 # Open webcam
 cap = cv2.VideoCapture(0)
@@ -107,21 +107,21 @@ while cap.isOpened():
         left_knee_ankle_angle = calculate_knee_ankle_vertical_angle(landmarks[LEFT_KNEE], landmarks[LEFT_ANKLE])
 
         # angles = [right_knee_angle, left_knee_angle, right_groin_angle, left_groin_angle, right_hip_angle, left_hip_angle, right_shoulder_angle, left_shoulder_angle, right_torso_angle, left_torso_angle, right_side, left_side,right_torsorel_angle,left_torsorel_angle,right_knee_ankle_angle, left_knee_ankle_angle]
-        angles = [right_knee_angle, left_knee_angle, right_groin_angle, left_groin_angle, right_hip_angle, left_hip_angle, right_shoulder_angle, left_shoulder_angle, right_torso_angle, left_torso_angle, right_side, left_side,right_torsorel_angle,left_torsorel_angle]
+        # angles = [right_knee_angle, left_knee_angle, right_groin_angle, left_groin_angle, right_hip_angle, left_hip_angle, right_shoulder_angle, left_shoulder_angle, right_torso_angle, left_torso_angle, right_side, left_side,right_torsorel_angle,left_torsorel_angle]
 
-        # angles = [right_elbow_angle, left_elbow_angle, right_hip_angle, left_hip_angle, right_shoulder_angle, left_shoulder_angle, right_torso_angle, left_torso_angle, right_side, left_side]
+        angles = [right_knee_angle, left_knee_angle,right_elbow_angle, left_elbow_angle, right_hip_angle, left_hip_angle, right_shoulder_angle, left_shoulder_angle, right_torso_angle, left_torso_angle, right_side, left_side]
 
 
         # angles_df = pd.DataFrame([angles], columns=['Right Knee Angle', 'Left Knee Angle', 'Right Groin Angle', 'Left Groin Angle', 
         #                                             'Right Hip Angle', 'Left Hip Angle', 'Right Shoulder Angle', 'Left Shoulder Angle', 
         #                                             'Right Torso Angle', 'Left Torso Angle', 'Right Side Angle', 'Left Side Angle', 'Right Torso Rel Angle','Left Torso Rel Angle','Right Knee Ankle Angle', 'Left Knee Ankle Angle'])
-        angles_df = pd.DataFrame([angles], columns=['Right Knee Angle', 'Left Knee Angle', 'Right Groin Angle', 'Left Groin Angle', 
-                                                    'Right Hip Angle', 'Left Hip Angle', 'Right Shoulder Angle', 'Left Shoulder Angle', 
-                                                    'Right Torso Angle', 'Left Torso Angle', 'Right Side Angle', 'Left Side Angle', 'Right Torso Rel Angle','Left Torso Rel Angle'])
-        
-        # angles_df = pd.DataFrame([angles], columns=['Right Elbow Angle', 'Left Elbow Angle', 
+        # angles_df = pd.DataFrame([angles], columns=['Right Knee Angle', 'Left Knee Angle', 'Right Groin Angle', 'Left Groin Angle', 
         #                                             'Right Hip Angle', 'Left Hip Angle', 'Right Shoulder Angle', 'Left Shoulder Angle', 
-        #                                             'Right Torso Angle', 'Left Torso Angle', 'Right Side Angle', 'Left Side Angle'])
+        #                                             'Right Torso Angle', 'Left Torso Angle', 'Right Side Angle', 'Left Side Angle', 'Right Torso Rel Angle','Left Torso Rel Angle'])
+        
+        angles_df = pd.DataFrame([angles], columns=['Right Knee Angle','Left Knee Angle', 'Right Elbow Angle', 'Left Elbow Angle', 
+                                                    'Right Hip Angle', 'Left Hip Angle', 'Right Shoulder Angle', 'Left Shoulder Angle', 
+                                                    'Right Torso Angle', 'Left Torso Angle', 'Right Side Angle', 'Left Side Angle'])
         
         angles_df.fillna(angles_df.mean(), inplace=True)
 

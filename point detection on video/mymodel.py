@@ -4,7 +4,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
 
 # Load the data
-df = pd.read_excel('../media/angles_output_hip6.xlsx')
+df = pd.read_excel('../media/exercises_dataset.xlsx')
 
 # Features (angles) and labels (poses)
 X = df[['Right Knee Angle', 'Left Knee Angle', 'Right Groin Angle', 'Left Groin Angle',
@@ -37,4 +37,4 @@ print(f'Accuracy: {accuracy_score(y_test, y_pred)}')
 
 # Save the trained model using joblib
 import joblib
-joblib.dump(model, 'pose_classification_hip6_model.pkl')
+joblib.dump(model, 'pose_classification_exercise2_model.pkl')

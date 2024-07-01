@@ -1,0 +1,141 @@
+import cv2
+import mediapipe as mp
+import math
+import joblib
+import pandas as pd
+from collections import Counter
+
+def calculate_knee_ankle_vertical_angle(knee, ankle):
+    """
+    Calculate the angle between the line formed by knee and ankle landmarks and the vertical axis.
+    
+    Parameters:
+    knee (tuple): Coordinates of the knee (x_k, y_k).
+    ankle (tuple): Coordinates of the ankle (x_a, y_a).
+    
+    Returns:
+    float: Angle in degrees.
+    """
+    try:
+        # Calculate the differences in x and y coordinates
+        dx = knee[0] - ankle[0]
+        dy = knee[1] - ankle[1]
+        
+        # Calculate the angle with respect to the vertical axis
+        angle_radians = math.atan2(abs(dx), abs(dy))
+        angle_degrees = math.degrees(angle_radians)
+        
+        return angle_degrees
+    except:
+        return None
+
+def calculate_torso_angle(landmark1, landmark2):
+    try:
+        angle = math.degrees(math.atan2(abs(landmark1[1] - landmark2[1]), abs(landmark1[0] - landmark2[0])))
+        return angle
+    except:
+        return None
+    
+def calculate_angle(point1, point2, point3):
+    try:
+        vector1 = [point1[0] - point2[0], point1[1] - point2[1]]
+        vector2 = [point3[0] - point2[0], point3[1] - point2[1]]
+        dot_product = vector1[0] * vector2[0] + vector1[1] * vector2[1]
+        magnitude1 = math.sqrt(vector1[0] ** 2 + vector1[1] ** 2)
+        magnitude2 = math.sqrt(vector2[0] ** 2 + vector2[1] ** 2)
+        angle = math.acos(dot_product / (magnitude1 * magnitude2))
+        angle_degrees = math.degrees(angle)
+        return angle_degrees
+    except:
+        return None
+
+# Initialize MediaPipe Pose module
+mpPose = mp.solutions.pose
+mp_drawing = mp.solutions.drawing_utils
+pose = mpPose.Pose()
+
+# Load the trained model
+model = joblib.load('pose_classification_subfolder_model.pkl')
+
+# Open webcam
+cap = cv2.VideoCapture(0)
+
+while cap.isOpened():
+    ret, frame = cap.read()
+    if not ret:
+        break
+
+    imgRGB = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    results = pose.process(imgRGB)
+
+    if results.pose_landmarks:
+        # Draw landmarks and connections
+        mp_drawing.draw_landmarks(
+            frame, 
+            results.pose_landmarks, 
+            mpPose.POSE_CONNECTIONS,
+            mp_drawing.DrawingSpec(color=(0, 0, 255), thickness=2, circle_radius=2),
+            mp_drawing.DrawingSpec(color=(0, 255, 0), thickness=2, circle_radius=2)
+        )
+
+        landmarks = []
+        for lm in results.pose_landmarks.landmark:
+            h, w, c = frame.shape
+            cx, cy = int(lm.x * w), int(lm.y * h)
+            landmarks.append((cx, cy))
+
+        RIGHT_HIP = 24
+        RIGHT_KNEE = 26
+        RIGHT_ANKLE = 28
+        LEFT_HIP = 23
+        LEFT_KNEE = 25
+        LEFT_ANKLE = 27
+        RIGHT_SHOULDER = 12
+        RIGHT_ELBOW = 14
+        RIGHT_WRIST = 16
+        LEFT_SHOULDER = 11
+        LEFT_ELBOW = 13
+        LEFT_WRIST = 15
+
+        right_knee_angle = calculate_angle(landmarks[RIGHT_HIP], landmarks[RIGHT_KNEE], landmarks[RIGHT_ANKLE])
+        left_knee_angle = calculate_angle(landmarks[LEFT_HIP], landmarks[LEFT_KNEE], landmarks[LEFT_ANKLE])
+        right_elbow_angle = calculate_angle(landmarks[RIGHT_SHOULDER], landmarks[RIGHT_ELBOW], landmarks[RIGHT_WRIST])
+        left_elbow_angle = calculate_angle(landmarks[LEFT_SHOULDER], landmarks[LEFT_ELBOW], landmarks[LEFT_WRIST])
+        right_hip_angle = calculate_angle(landmarks[RIGHT_KNEE], landmarks[RIGHT_HIP], landmarks[RIGHT_SHOULDER])
+        left_hip_angle = calculate_angle(landmarks[LEFT_KNEE], landmarks[LEFT_HIP], landmarks[LEFT_SHOULDER])
+        left_shoulder_angle = calculate_angle(landmarks[LEFT_ELBOW], landmarks[LEFT_SHOULDER], landmarks[LEFT_HIP])
+        right_shoulder_angle = calculate_angle(landmarks[RIGHT_ELBOW], landmarks[RIGHT_SHOULDER], landmarks[RIGHT_HIP])
+        right_torso_angle = calculate_angle(landmarks[RIGHT_SHOULDER], landmarks[RIGHT_HIP], landmarks[LEFT_HIP])
+        left_torso_angle = calculate_angle(landmarks[LEFT_SHOULDER], landmarks[LEFT_HIP], landmarks[RIGHT_HIP])
+        right_side = calculate_angle(landmarks[RIGHT_SHOULDER], landmarks[RIGHT_HIP], landmarks[RIGHT_KNEE])
+        left_side = calculate_angle(landmarks[LEFT_SHOULDER], landmarks[LEFT_HIP], landmarks[LEFT_KNEE])
+        right_groin_angle = calculate_angle(landmarks[LEFT_KNEE], landmarks[LEFT_HIP],landmarks[RIGHT_KNEE])
+        left_groin_angle = calculate_angle(landmarks[RIGHT_KNEE],landmarks[RIGHT_HIP],landmarks[LEFT_KNEE])
+        right_torsorel_angle = calculate_torso_angle(landmarks[RIGHT_SHOULDER], landmarks[RIGHT_HIP])
+        left_torsorel_angle = calculate_torso_angle(landmarks[LEFT_SHOULDER], landmarks[LEFT_HIP])
+        right_knee_ankle_angle = calculate_knee_ankle_vertical_angle(landmarks[RIGHT_KNEE], landmarks[RIGHT_ANKLE])
+        left_knee_ankle_angle = calculate_knee_ankle_vertical_angle(landmarks[LEFT_KNEE], landmarks[LEFT_ANKLE])
+
+        angles = [right_knee_angle, left_knee_angle, right_groin_angle, left_groin_angle, right_hip_angle, left_hip_angle, right_shoulder_angle, left_shoulder_angle, right_torso_angle, left_torso_angle, right_side, left_side,right_torsorel_angle,left_torsorel_angle,right_knee_ankle_angle, left_knee_ankle_angle]
+
+        angles_df = pd.DataFrame([angles], columns=['Right Knee Angle', 'Left Knee Angle', 'Right Groin Angle', 'Left Groin Angle', 
+                                                    'Right Hip Angle', 'Left Hip Angle', 'Right Shoulder Angle', 'Left Shoulder Angle', 
+                                                    'Right Torso Angle', 'Left Torso Angle', 'Right Side Angle', 'Left Side Angle', 'Right Torso Rel Angle','Left Torso Rel Angle','Right Knee Ankle Angle', 'Left Knee Ankle Angle'])
+        
+        angles_df.fillna(angles_df.mean(), inplace=True)
+
+        predictions = model.predict(angles_df)
+        pose_prediction = Counter(predictions).most_common(1)[0][0]
+
+        cv2.putText(frame, pose_prediction, (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 2)
+    else:
+        cv2.putText(frame, "NO POSE", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+
+    cv2.imshow('Pose Classification', frame)
+
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+cap.release()
+cv2.destroyAllWindows()
+pose.close()
